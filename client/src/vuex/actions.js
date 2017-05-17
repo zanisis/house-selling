@@ -4,7 +4,7 @@ export default {
   houseSelling({commit}) {
     let url = 'http://localhost:3000/'
     axios.get(url).then((response)=>{
-      console.log(response.data);
+      // console.log(response.data);
       let data = response.data
       commit('mutate', data)
     }).catch((err)=>{
@@ -23,5 +23,9 @@ export default {
       // console.log(response.data);
       context.commit('pushHouse', response.data)
       })
+  },
+  getEditHouse({commit}, idHouse){
+    console.log('in actions--',idHouse);
+    commit('editHouse', idHouse)
   }
 }

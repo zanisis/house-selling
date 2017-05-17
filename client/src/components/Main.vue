@@ -1,8 +1,8 @@
 <template lang="html">
   <div class="ui segment" style="margin-bottom:20px">
-    <div v-for="sell in sells" style="padding:5px">
+    <div v-for="(sell, index) in sells" style="padding:5px">
       <div class="ui top attached header" style="text-align:left;height:100px;">
-        <img id="image-detail" src="https://static.pexels.com/photos/106399/pexels-photo-106399.jpeg" class="ui large circular image">
+        <img id="image-detail" :src="sell.image" class="ui large circular image">
       </div>
       <div style="text-align:left" class="ui attached segment left">
         <div class="">
@@ -15,11 +15,16 @@
           <Label>phone : </Label> {{sell.phone}}
         </div>
         <div class="item" style="text-align:right">
-          <div class="ui button violet basic" id="">Edit</div>
-          <div class="ui button violet basic" id="">show</div>
+          <div class="ui button violet basic" @click="getIdHouse(sell._id)">Edit</div>
+          <!-- <router-link :to="{name: 'Showmap'}"> -->
+            <div class="ui button olive" @click="showMap(index)">show</div>
+          <!-- </router-link> -->
         </div>
       </div>
+      <!-- <router-view></router-view> -->
     </div>
+    <location></location>
+
     <div class="ui small modal">
       <div class="ui icon header">
         Sell Your House
@@ -62,12 +67,12 @@
             </div>
           </div>
           <!-- <div class="field"> -->
-            <google-map v-on:childGoogle="fromGoogle"></google-map>
+            <google-map v-on:childGoogle="fromGoogle" :location="dataHouse.location" :centerParent="dataHouse.center"></google-map>
           <!-- </div> -->
         </div>
       </div>
       <div class="actions">
-        <div class="ui red cancel inverted button" id="submit" @click="cancel">
+        <div class="ui red cancel inverted button" @click="cancel">
           <i class="remove icon"></i>
           No
         </div>
@@ -83,6 +88,8 @@
 
 <script>
 import GoogleMap from './Google'
+import Location from './ShowGmap'
+
 import axios from 'axios'
 
 export default {
@@ -91,35 +98,67 @@ export default {
   },
   data(){
     return {
+      mapId : 0,
       dataHouse : {
         owner : '',
         phone : '',
         address : '',
         price : '',
         image : '',
-        location : ''
+        location : '',
+        center : {
+          lat: -6.2607134, lng: 106.7794275
+        }
       }
     }
   },
   computed: {
     sells(){
       return this.$store.state.house
+    },
+    getOneHouse(){
+      return this.$store.state.onehouse
     }
   },
   methods : {
+    showMap(id){
+      // console.log(id);
+      this.mapId = id
+      // console.log(this.mapId);
+    },
     cancel(){
-      dataHouse.owner = '',
-      dataHouse.phone = '',
-      dataHouse.address = '',
-      dataHouse.price = '',
-      dataHouse.image = '',
-      dataHouse.location = ''
+      this.dataHouse = {
+        owner : '',
+        phone : '',
+        address : '',
+        price : '',
+        image : '',
+        location : '',
+        center : {
+          lat: -6.2607134,
+          lng: 106.7794275
+        }
+      }
+      console.log(this);
     },
     create(){
+      // console.log(this);
       this.$store.dispatch('addHouse', this.dataHouse)
     },
     fromGoogle(data){
       this.dataHouse.location = data
+    },
+    getIdHouse(id){
+      // console.log('di edit ',this.dataHouse);
+      this.$store.dispatch('getEditHouse', id)
+      // console.log(this.getOneHouse);
+      let separate = this.getOneHouse.location.split(' ')
+      this.dataHouse = this.getOneHouse;
+      this.dataHouse.center = {
+        lat: Number(separate[0]),
+        lng: Number(separate[1])
+      }
+      console.log('setelah proses -- ',this.dataHouse)
     }
   }
 }
