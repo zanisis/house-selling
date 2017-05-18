@@ -1,6 +1,19 @@
 <template lang="html">
-  <div>
-    <h1>Tara</h1>
+  <div style="padding: 5px 175px">
+    <gmap-map
+    :center="center"
+    :zoom="14"
+    style="width: 300px; height: 200px"
+    >
+
+    <gmap-marker
+    v-for="m in markers"
+    :position="m.position"
+    :clickable="true"
+    :draggable="true"
+    @click="center=m.position"
+    ></gmap-marker>
+  </gmap-map>
   </div>
 </template>
 
@@ -16,14 +29,12 @@ Vue.use(VueGoogleMaps, {
     }
   });
 export default {
+  props : ['position'],
   data(){
     return{
-      center: {
-        lat: -6.2607134,
-        lng: 106.7794275
-      },
+      center: this.position,
       markers: [{
-        position: {lat: -6.2607134, lng: 106.7794275}
+        position: this.position
       }]
     }
   }

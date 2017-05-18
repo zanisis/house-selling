@@ -15,15 +15,18 @@
           <Label>phone : </Label> {{sell.phone}}
         </div>
         <div class="item" style="text-align:right">
+          <div class="ui button red basic icon" @click="deleteIdHouse(sell._id)"><i class="trash icon"></i></div>
+
           <div class="ui button violet basic" @click="getIdHouse(sell._id)">Edit</div>
           <!-- <router-link :to="{name: 'Showmap'}"> -->
-            <div class="ui button olive" @click="showMap(index)">show</div>
+          <div class="ui button olive" @click="showMap(sell._id, index)">show</div>
           <!-- </router-link> -->
+
         </div>
       </div>
+      <detail-map v-if="index === mapId" :position="dataHouse.center"></detail-map>
       <!-- <router-view></router-view> -->
     </div>
-    <location></location>
 
     <div class="ui small modal">
       <div class="ui icon header">
@@ -76,9 +79,13 @@
           <i class="remove icon"></i>
           No
         </div>
-        <div class="ui green ok inverted button" id="submit" @click="create">
+        <div v-if="CreateOrUpdate" class="ui green ok inverted button" id="submit" @click="create">
           <i class="checkmark icon"></i>
           Yes
+        </div>
+        <div v-if="!CreateOrUpdate" class="ui green ok inverted button" id="submit" @click="update">
+          <i class="checkmark icon"></i>
+          Update
         </div>
       </div>
     </div>
@@ -88,17 +95,18 @@
 
 <script>
 import GoogleMap from './Google'
-import Location from './ShowGmap'
+import DetailMap from './DetailMap'
 
 import axios from 'axios'
 
 export default {
   components: {
-    GoogleMap
+    GoogleMap,DetailMap
   },
   data(){
     return {
-      mapId : 0,
+      CreateOrUpdate : true,
+      mapId : '',
       dataHouse : {
         owner : '',
         phone : '',
@@ -121,10 +129,39 @@ export default {
     }
   },
   methods : {
-    showMap(id){
-      // console.log(id);
-      this.mapId = id
-      // console.log(this.mapId);
+    update(){
+      this.CreateOrUpdate = true
+      console.log(this.dataHouse);
+      this.$store.dispatch('updateDbAfterEdit', this.dataHouse)
+      this.dataHouse = {
+        owner : '',
+        phone : '',
+        address : '',
+        price : '',
+        image : '',
+        location : '',
+        center : {
+          lat: -6.2607134,
+          lng: 106.7794275
+        }
+      }
+    },
+    deleteIdHouse(id){
+      this.$store.dispatch('destroyHouse', id)
+    },
+    showMap(id, index){
+      // console.log('idnya', id);
+      this.$store.dispatch('getEditHouse', id)
+      let separate = this.getOneHouse.location.split(' ')
+      this.dataHouse = this.getOneHouse;
+      this.dataHouse.center = {
+        lat: Number(separate[0]),
+        lng: Number(separate[1])
+      }
+      console.log('setelah proses -- ',this.getOneHouse)
+      this.mapId = index
+      console.log('index', this.mapId);
+
     },
     cancel(){
       this.dataHouse = {
@@ -150,6 +187,7 @@ export default {
     },
     getIdHouse(id){
       // console.log('di edit ',this.dataHouse);
+      this.CreateOrUpdate = false
       this.$store.dispatch('getEditHouse', id)
       // console.log(this.getOneHouse);
       let separate = this.getOneHouse.location.split(' ')
@@ -159,6 +197,8 @@ export default {
         lng: Number(separate[1])
       }
       console.log('setelah proses -- ',this.dataHouse)
+      // this.$store.dispatch('updateDbAfterEdit', id)
+
     }
   }
 }
